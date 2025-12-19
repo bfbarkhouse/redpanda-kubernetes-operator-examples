@@ -53,6 +53,13 @@ storage:
   size: 1Gi # adjust the desired size
 EOF
 echo ""
+echo "4. Change the image pull policy in helm/polaris/ci/persistence-values.yaml"
+echo ""
+cat << 'EOF'
+image:
+  pullPolicy: IfNotPresent
+EOF
+echo ""
 echo "Press enter when completed..."
 echo "============================="
 read -r
