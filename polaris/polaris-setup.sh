@@ -29,6 +29,7 @@ fi
 echo ""
 echo "===== BEFORE PROCEEDING ====="
 echo "1. Set the MinIO access key secrets in helm/polaris/ci/fixtures/storage.yaml"
+echo ""
 echo "2. Add the following extraEnv stanza to helm/polaris/ci/persistence-values.yaml"
 echo ""
 cat << 'EOF'
