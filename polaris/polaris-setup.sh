@@ -114,8 +114,6 @@ kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X GET http://local
 
 # === Troubleshooting ===
 
-# If the Polaris pod can't pull the image because of the Never policy, edit image.pullPolicy in helm/polaris/ci/persistence-values.yaml
-
 # View tables in the catalog
 # kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X GET http://localhost:8181/api/catalog/v1/${POLARIS_CATALOG_NAME}/namespaces/redpanda/tables \
 #  -H "Authorization: Bearer $TOKEN" | jq
@@ -124,46 +122,4 @@ kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X GET http://local
 # kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X GET http://localhost:8181/api/catalog/v1/${POLARIS_CATALOG_NAME}/namespaces/redpanda/tables/<table_name> \
 # -H "Authorization: Bearer $TOKEN" | jq
 
-# Delete a catalog (requires emptying first)
-
-# CATALOG_NAME="${POLARIS_CATALOG_NAME}"
-# echo "Enumerating namespaces in catalog: $CATALOG_NAME"
-# NAMESPACES=$(kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X GET \
-#   "http://localhost:8181/api/catalog/v1/$CATALOG_NAME/namespaces" \
-#   -H "Authorization: Bearer $TOKEN" | jq -r '.namespaces[].namespace | join(".")')
-#
-# for NS in $NAMESPACES; do
-#   echo "Processing namespace: $NS"
-#
-#   # Get all tables in the namespace
-#   TABLES=$(kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X GET \
-#     "http://localhost:8181/api/catalog/v1/$CATALOG_NAME/namespaces/$NS/tables" \
-#     -H "Authorization: Bearer $TOKEN" | jq -r '.identifiers[]?.name // empty')
-#
-#   # Delete each table
-#   for TABLE in $TABLES; do
-#     echo "  Deleting table: $NS.$TABLE"
-#     kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X DELETE \
-#       "http://localhost:8181/api/catalog/v1/$CATALOG_NAME/namespaces/$NS/tables/$TABLE?purgeRequested=true" \
-#       -H "Authorization: Bearer $TOKEN"
-#   done
-# done
-#
-# # Delete all namespaces
-# for NS in $NAMESPACES; do
-#   echo "Deleting namespace: $NS"
-#   kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X DELETE \
-#     "http://localhost:8181/api/catalog/v1/$CATALOG_NAME/namespaces/$NS" \
-#     -H "Authorization: Bearer $TOKEN"
-# done
-#
-# # Finally delete the catalog
-# echo "Deleting catalog: $CATALOG_NAME"
-# kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X DELETE \
-#   "http://localhost:8181/api/management/v1/catalogs/$CATALOG_NAME" \
-#   -H "Authorization: Bearer $TOKEN" | jq
-
-# Sources:
-# https://github.com/apache/polaris/tree/main/helm/polaris
-# https://github.com/redpanda-data-blog/demos-iceberg-topics/blob/main/setup.sh
-# 
+# To delete a catalog see polaris-delete-catalog.sh
