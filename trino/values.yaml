@@ -1,0 +1,45 @@
+# kubectl create namespace trino
+# kubectl apply -f polaris-trino-creds.yaml -n trino
+# helm upgrade --install trino trino/trino -n trino -f values.yaml
+
+server:
+  workers: 1
+
+  # Extra JVM/system properties
+  additionalProperties:
+    log.level: DEBUG
+    logger.io.trino.plugin.iceberg: DEBUG
+    logger.io.trino.plugin.iceberg.catalog.rest: DEBUG
+    logger.io.trino.filesystem.s3.debug: DEBUG
+    logger.io.trino.s3.debug: DEBUG
+
+# Define the Polaris-backed Iceberg catalog
+catalogs:
+  polaris: |
+    connector.name=iceberg
+    iceberg.catalog.type=rest
+    iceberg.rest-catalog.uri=http://polaris.redpanda-polaris.svc.cluster.local:8181/api/catalog
+    iceberg.rest-catalog.warehouse=redpanda_catalog
+    iceberg.rest-catalog.security=oauth2
+    iceberg.rest-catalog.oauth2.credential=${ENV:CLIENT_ID}:${ENV:CLIENT_SECRET}
+    iceberg.rest-catalog.oauth2.scope=${ENV:OAUTH2_SCOPE}
+    iceberg.rest-catalog.oauth2.server-uri=http://polaris.redpanda-polaris.svc.cluster.local:8181/api/catalog/v1/oauth/tokens
+    iceberg.rest-catalog.vended-credentials-enabled=false
+
+    fs.native-s3.enabled=true
+    s3.endpoint=https://opstoreprod.dxplatform.comcast.com:443
+    s3.path-style-access=true
+    s3.region=local
+    s3.aws-access-key=${ENV:AWS_ACCESS_KEY_ID}
+    s3.aws-secret-key=${ENV:AWS_SECRET_ACCESS_KEY}
+
+# Inject env vars from the Secret above into Trino pods
+envFrom:
+    - secretRef:
+        name: polaris-trino-creds
+
+# Expose Trino (pick whatever Service type works for you)
+service:
+  type: NodePort
+  nodePort: 30080
+

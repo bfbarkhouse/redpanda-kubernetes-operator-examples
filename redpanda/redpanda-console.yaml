@@ -1,0 +1,62 @@
+# kubectl apply -f redpanda-console.yaml --namespace redpanda 
+---
+apiVersion: cluster.redpanda.com/v1alpha2
+kind: Console
+metadata:
+  name: redpanda
+  namespace: redpanda
+spec:
+  replicaCount: 1
+  image: 
+    tag: v3.3.2
+  cluster:
+    clusterRef:
+      name: redpanda # Reference to your Redpanda cluster
+
+  # Example ingress service config 
+  # ingress:
+  #   enabled: true
+  #   className: nginx
+  #   annotations:
+  #     kubernetes.io/ingress.class: nginx
+  #     cert-manager.io/cluster-issuer: letsencrypt-prod
+  #   hosts:
+  #     - host: redpanda-console.example.com
+  #       paths:
+  #         - path: /
+  #           pathType: ImplementationSpecific
+  #   tls:
+  #     - secretName: redpanda-console-tls
+  #         hosts:
+  #           - redpanda-console.example.com
+  config:
+    server:
+      listenPort: 8080
+    auditLog:
+      enabled: true
+      additionalHeaders:
+        - "X-Forwarded-For"
+        - "User-Agent"
+    # Console UI authentication
+    authentication:
+      jwtSigningKey: 6l7m31lrrddkxdxnriylccv5lxxiyxfi # Arbitrary 32 character string
+      useSecureCookies: false # set to true if using TLS or TLS is terminated at an upstream service such as a reverse proxy or HTTPS loadbalancer
+      basic:
+        enabled: true
+    # Service-level impersonation settings
+    kafka:
+      sasl:
+        enabled: true
+        impersonateUser: true
+    redpanda:
+      adminApi:
+        enabled: true
+        authentication:
+          impersonateUser: true
+    schemaRegistry:
+      enabled: true
+      authentication:
+        impersonateUser: true
+    
+    logger:
+      level: info

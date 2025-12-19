@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: polaris-trino-creds
+type: Opaque
+stringData:
+  CLIENT_ID: root
+  CLIENT_SECRET: s3cr3t
+  OAUTH2_SCOPE: "PRINCIPAL_ROLE:ALL"
+  AWS_ACCESS_KEY_ID: "<S3 access key>"
+  AWS_SECRET_ACCESS_KEY: "<S3 secret key>"

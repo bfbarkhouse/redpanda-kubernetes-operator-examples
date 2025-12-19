@@ -1,0 +1,13 @@
+config:
+  input:
+    generate:
+      interval: 1s
+      count: 0  # Setting count to 0 ensures it generates data indefinitely.
+      mapping: |
+        root.message = "Hello, Redpanda Connect!"
+  pipeline:
+    processors:
+      - mapping: |
+          root = this.message.uppercase()
+  output:
+    stdout: {}

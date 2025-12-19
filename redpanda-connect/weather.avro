@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "WeatherReading",
+  "namespace": "com.redpanda.weather",
+  "fields": [
+    { "name": "city", "type": ["null", "string"], "default": null },
+
+    { "name": "temperature_c", "type": ["null", "double"], "default": null },
+    { "name": "temperature_f", "type": ["null", "double"], "default": null },
+    { "name": "feels_like_c", "type": ["null", "double"], "default": null },
+
+    { "name": "humidity", "type": ["null", "double"], "default": null },
+    { "name": "description", "type": ["null", "string"], "default": null },
+
+    { "name": "wind_speed_kmh", "type": ["null", "double"], "default": null },
+
+    { "name": "timestamp", "type": ["null", "string"], "default": null }
+  ]
+}
+
