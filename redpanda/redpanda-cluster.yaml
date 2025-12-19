@@ -78,9 +78,8 @@ spec:
     #   enabled: true
     #   type: NodePort
     #   domain: example.com 
-# Operator will configure brokers to advertise FQDNs (e.g. redpanda-0.example.com:31092). 
+# Operator will configure brokers to advertise FQDNs (e.g. redpanda-0.example.com). 
 # Requires DNS records or ExternalDNS integration
-# TLS cert SANs must include all the broker FQDNs
 
     config:
       cluster:
