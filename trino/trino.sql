@@ -1,7 +1,5 @@
 SHOW SCHEMAS FROM polaris;
-
 USE polaris.redpanda;
-
 SHOW TABLES;
 
 SELECT * FROM polaris.redpanda.events;

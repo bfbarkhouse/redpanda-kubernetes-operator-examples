@@ -11,3 +11,4 @@ config:
           root = this.message.uppercase()
   output:
     stdout: {}
+    

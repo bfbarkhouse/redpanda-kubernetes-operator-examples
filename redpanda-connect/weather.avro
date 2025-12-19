@@ -17,4 +17,3 @@
     { "name": "timestamp", "type": ["null", "string"], "default": null }
   ]
 }
-

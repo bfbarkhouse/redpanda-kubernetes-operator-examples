@@ -56,3 +56,4 @@ echo "Deleting catalog: $CATALOG_NAME"
 kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X DELETE \
   "http://localhost:8181/api/management/v1/catalogs/$CATALOG_NAME" \
   -H "Authorization: Bearer $TOKEN" | jq
+  

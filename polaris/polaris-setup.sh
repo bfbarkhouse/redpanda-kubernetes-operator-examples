@@ -107,13 +107,6 @@ kubectl exec $POLARIS_POD -n ${POLARIS_NAMESPACE} -- curl -s -X GET http://local
 
 # === Troubleshooting ===
 
-# You might need to change the storage settings in the polaris/helm/polaris/values.yaml file if you see the pod pending due to PVC claim error
-# storage:
-#       # -- The storage class name of the persistent volume claim to create.
-#       className: hostpath # standard, default or whatever class name is required
-#       # -- The size of the persistent volume claim to create.
-#       size: 1Gi
-
 # If the Polaris pod can't pull the image because of the Never policy, edit image.pullPolicy in helm/polaris/ci/persistence-values.yaml
 
 # View tables in the catalog
