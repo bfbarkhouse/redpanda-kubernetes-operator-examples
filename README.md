@@ -95,8 +95,7 @@ This project provides a complete reference architecture for building a modern da
 ### 1. Setup Apache Polaris Catalog
 
 ```bash
-cd polaris
-./polaris-setup.sh
+./polaris/polaris-setup.sh
 ```
 ### 2. Deploy Redpanda Cluster
 
@@ -147,13 +146,11 @@ helm install trino trino/trino -f trino/values.yaml -n trino
 ### 4. Deploy Redpanda Connect Pipelines
 
 ```bash
-cd redpanda-connect
-
 # Create weather topic and schema
-./create-weather-topic.sh
+./redpanda-connect/create-weather-topic.sh
 
 # Install Redpanda Connect
-./rpcn-install.sh
+./redpanda-connect/rpcn-install.sh
 ```
 
 ## Usage Examples
@@ -161,8 +158,7 @@ cd redpanda-connect
 ### Query Iceberg Tables via Polaris API
 
 ```bash
-cd polaris
-./polaris-query.sh
+./polaris/polaris-query.sh
 ```
 
 ### Access Redpanda Console
