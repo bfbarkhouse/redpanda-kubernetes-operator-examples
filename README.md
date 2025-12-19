@@ -1,4 +1,4 @@
-# Kubernetes Data Streaming & Analytics Platform
+# Reference Data Streaming & Analytics Architecture
 
 A Kubernetes-based data lakehouse platform demonstrating end-to-end data streaming, cataloging, and analytics using Apache Iceberg, Redpanda, Polaris, and Trino.
 
@@ -101,7 +101,8 @@ cd polaris
 ### 2. Deploy Redpanda Cluster
 
 ```bash
-# Install the K8s cluster-scoped Redpanda Operator. This enables you deploy multiple Redpanda clusters in multiple namespaces from one Operator installation
+# Install the K8s cluster-scoped Redpanda Operator. 
+# This enables deployment of multiple Redpanda clusters in multiple namespaces from one operator installation
 helm repo add redpanda https://charts.redpanda.com
 helm repo update
 helm upgrade --install redpanda-controller redpanda/operator \
