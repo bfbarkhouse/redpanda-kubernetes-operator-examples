@@ -46,18 +46,18 @@ spec:
         name: redpanda-license 
         key: license 
 
-# Enable Kafka authentication
+    # Enable Kafka authentication
     auth:
       sasl:
         enabled: true
-# Set superusers
+        # Set superusers
         secretRef: redpanda-superusers 
         users: []
 
     tls:
       enabled: true
 
-# Example config for custom TLS issuer
+      # Example config for custom TLS issuer
       # certs:
       #   default: 
       #     issuerRef:
@@ -71,15 +71,15 @@ spec:
       #       kind: ClusterIssuer
       #   caEnabled: true
 
-# Example config for external access
+    # Example config for external access
     # external:
     #   service:
     #     enabled: true
     #   enabled: true
     #   type: NodePort
     #   domain: example.com 
-# Operator will configure brokers to advertise FQDNs (e.g. redpanda-0.example.com). 
-# Requires DNS records or ExternalDNS integration
+    # Operator will configure brokers to advertise FQDNs (e.g. redpanda-0.example.com). 
+    # Requires DNS records or ExternalDNS integration
 
     config:
       cluster:
@@ -103,10 +103,11 @@ spec:
     statefulset:
       additionalRedpandaCmdFlags:
         - "--lock-memory"
-# Enables memory locking for the Redpanda process so the operating system does not page Redpanda’s memory out to disk. Recommended for production
+        # Enables memory locking for the Redpanda process so the operating system does not page Redpanda’s memory out to disk. 
+        # Recommended for production
       replicas: 3 # number of Redpanda brokers to create
 
-# Modify the resources as needed
+    # Modify the resources as needed
     resources:
       requests:
         memory: 64G
@@ -114,6 +115,14 @@ spec:
         memory: 64G
       cpu:
         cores: 16
+
+    storage:
+      persistentVolume:
+        enabled: true
+        size: 20Gi # Default is 20 Gi, adjust data directory size as needed
+        storageClass: "" # If undefined or empty (default), then no storageClassName spec is set, and the default dynamic provisioner is chosen
+        labels: {}
+        annotations: {}
 
       tiered:
         credentialsSecretRef:
@@ -136,5 +145,5 @@ spec:
           cloud_storage_enable_remote_write: true
           cloud_storage_enable_remote_read: true
 
-      logging:
-        logLevel: info
+    logging:
+      logLevel: info
