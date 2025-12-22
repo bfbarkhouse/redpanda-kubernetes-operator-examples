@@ -1,0 +1,91 @@
+# Mirror the Redpanda Connect image repo to your internal image registry
+image: 
+  repository: "docker.redpanda.com/redpandadata/connect"
+  tag: v4.68.0
+
+  imagePullSecrets:
+    - name: image-registry-credentials # Secret containing your registry info
+
+config:
+  input:
+    broker:
+      copies: 1
+      inputs:
+        - http_client:
+            url: "https://wttr.in/Boston?format=j1"
+            verb: GET
+            rate_limit: wttr
+          processors:
+            - mutation: |
+                meta city = "Boston"
+        - http_client:
+            url: "https://wttr.in/New+York?format=j1"
+            verb: GET
+            rate_limit: wttr
+          processors:
+            - mutation: |
+                meta city = "New York"
+        - http_client:
+            url: "https://wttr.in/Los+Angeles?format=j1"
+            verb: GET
+            rate_limit: wttr
+          processors:
+            - mutation: |
+                meta city = "Los Angeles"
+        - http_client:
+            url: "https://wttr.in/London?format=j1"
+            verb: GET
+            rate_limit: wttr
+          processors:
+            - mutation: |
+                meta city = "London"
+
+  pipeline:
+    processors:
+      - mapping: |
+          root = {
+              "city": meta("city").or(this.nearest_area.0.areaName.0.value),
+              "temperature_c": this.current_condition.0.temp_C.number(),
+              "temperature_f": this.current_condition.0.temp_F.number(),
+              "feels_like_c": this.current_condition.0.FeelsLikeC.number(),
+              "humidity": this.current_condition.0.humidity.number(),
+              "description": this.current_condition.0.weatherDesc.0.value,
+              "wind_speed_kmh": this.current_condition.0.windspeedKmph.number(),
+              "timestamp": now().format_timestamp("2006-01-02T15:04:05Z07:00")
+          }
+      - schema_registry_encode:
+          url: "https://redpanda-0.redpanda.redpanda.svc.cluster.local.:8081"
+          subject: "weather-value"
+          tls:
+            skip_cert_verify: true
+          avro_raw_json: true
+      - catch:
+        - log:
+            level: ERROR
+            message: 'schema_registry_encode failed: ${!error()}'
+        # Optional: keep the message unchanged in the pipeline
+        - mapping: |
+            root = this
+
+  output:
+    # stdout: {} 
+    redpanda:
+      seed_brokers: [ "redpanda-0.redpanda.redpanda.svc.cluster.local.:9093" ]
+      topic: weather
+      key: ${! meta("city") }
+      sasl:
+        - mechanism: SCRAM-SHA-256
+          username: <username>
+          password: <password>
+      tls:
+        enabled: true
+        skip_cert_verify: true
+
+  rate_limit_resources:
+    - label: wttr
+      local:
+        count: 6
+        interval: 60s
+
+  logger:
+    level: info

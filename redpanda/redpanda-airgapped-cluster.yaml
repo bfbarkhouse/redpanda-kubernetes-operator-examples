@@ -1,0 +1,171 @@
+# To deploy an airgapped Redpanda Cluster follow these instructions
+#
+# Mirror the Redpanda image repos to your internal image registry:
+# docker.redpanda.com/redpandadata/redpanda
+# docker.redpanda.com/redpandadata/redpanda-operator
+# docker.redpanda.com/redpandadata/console
+# docker.io/library/busybox
+#
+# Install the K8s cluster-scoped Redpanda Operator. This enables you deploy multiple Redpanda clusters in multiple namespaces from one Operator installation
+# helm repo add redpanda https://charts.redpanda.com
+# helm repo update
+# helm upgrade --install redpanda-controller redpanda/operator \
+#   --namespace <namespace> \
+#   --create-namespace \
+#   --version v25.3.1 \
+#   --set crds.enabled=true \
+#   --values redpanda-airgapped-operator.yaml
+#
+# Create the Redpanda cluster namespace
+# kubectl create namespace redpanda
+#
+# Create superusers secret:
+# echo 'superuser:secretpassword:SCRAM-SHA-256' >> superusers.txt
+# kubectl create secret generic redpanda-superusers --from-file=superusers.txt --namespace redpanda 
+#
+# Create the license key secret
+# kubectl create secret generic redpanda-license --from-file=license=./redpanda.license --namespace redpanda
+#
+# Create the tiered storage secrets
+# kubectl apply -f cloud-storage-secrets.yaml --namespace redpanda 
+#
+# Deploy the Redpanda cluster
+# kubectl apply -f redpanda-airgapped-cluster.yaml --namespace redpanda 
+
+# Deploy Redpanda Console
+# kubectl apply -f redpanda-airgapped-console.yaml --namespace redpanda
+
+---
+apiVersion: cluster.redpanda.com/v1alpha2
+kind: Redpanda
+metadata:
+  name: redpanda
+  namespace: redpanda
+
+spec:
+  clusterSpec:
+    # nodeSelector:
+    #   eks.amazonaws.com/nodegroup: "redpanda" # example label to schedule Redpanda pods to specific nodes
+    image:
+      tag: v25.3.2
+      repository: docker.redpanda.com/redpandadata/redpanda
+
+    imagePullSecrets:
+      - name: image-registry-credentials # Secret containing your registry info
+
+
+    enterprise:
+      licenseSecretRef:
+        name: redpanda-license 
+        key: license 
+
+    # Enable Kafka authentication
+    auth:
+      sasl:
+        enabled: true
+        # Set superusers
+        secretRef: redpanda-superusers 
+        users: []
+
+    tls:
+      enabled: true
+
+      # Example config for custom TLS issuer
+      # certs:
+      #   default: 
+      #     issuerRef:
+      #       name: issuer-name
+      #       kind: ClusterIssuer
+      #     caEnabled: true
+      #     applyInternalDNSNames: true
+      #   external: 
+      #     issuerRef:
+      #       name: issuer-name
+      #       kind: ClusterIssuer
+      #   caEnabled: true
+
+    # Example config for external access
+    # external:
+    #   service:
+    #     enabled: true
+    #   enabled: true
+    #   type: NodePort
+    #   domain: example.com 
+    # Operator will configure brokers to advertise FQDNs (e.g. redpanda-0.example.com). 
+    # Requires DNS records or ExternalDNS integration
+
+    config:
+      cluster:
+        admin_api_require_auth: true
+        iceberg_enabled: true 
+        iceberg_catalog_type: rest 
+        iceberg_rest_catalog_endpoint: http://polaris.redpanda-polaris.svc.cluster.local:8181/api/catalog/
+        iceberg_rest_catalog_warehouse: redpanda_catalog
+        iceberg_rest_catalog_client_id: root
+        iceberg_rest_catalog_client_secret: s3cr3t
+        iceberg_rest_catalog_authentication_mode: oauth2 
+        iceberg_rest_catalog_oauth2_server_uri: http://polaris.redpanda-polaris.svc.cluster.local:8181/api/catalog/v1/oauth/tokens 
+        iceberg_rest_catalog_oauth2_scope: PRINCIPAL_ROLE:ALL
+        iceberg_catalog_commit_interval_ms: 10000 
+        iceberg_target_lag_ms: 10000
+        cloud_storage_url_style: path
+        enable_shadow_linking: true
+        schema_registry_enable_authorization: false
+        audit_enabled: false
+
+    statefulset:
+      additionalRedpandaCmdFlags:
+        - "--lock-memory"
+        # Enables memory locking for the Redpanda process so the operating system does not page Redpanda’s memory out to disk. 
+        # Recommended for production
+      replicas: 3 # number of Redpanda brokers to create
+
+      sideCars:
+        image:
+          tag: v25.3.1
+          repository: docker.redpanda.com/redpandadata/redpanda-operator
+
+      initContainerImage:
+        repository: busybox
+        tag: latest
+
+    # Modify the resources as needed
+    resources:
+      requests:
+        memory: 64G
+      limits:
+        memory: 64G
+      cpu:
+        cores: 16
+
+    storage:
+      persistentVolume:
+        enabled: true
+        size: 20Gi # Default is 20 Gi, adjust data directory size as needed
+        storageClass: "" # If undefined or empty (default), then no storageClassName spec is set, and the default dynamic provisioner is chosen
+        labels: {}
+        annotations: {}
+
+      tiered:
+        credentialsSecretRef:
+          accessKey:
+            configurationKey: cloud_storage_access_key
+            name: cloud-storage-secrets
+            key: cloud_storage_access_key
+          secretKey:
+            configurationKey: cloud_storage_secret_key
+            name: cloud-storage-secrets
+            key: cloud_storage_secret_key
+        config:
+          cloud_storage_enabled: true
+          cloud_storage_api_endpoint: minio.minio.svc.cluster.local
+          cloud_storage_api_endpoint_port: 9000
+          cloud_storage_disable_tls: true
+          cloud_storage_region: local
+          cloud_storage_bucket: redpanda
+          cloud_storage_segment_max_upload_interval_sec: 30
+          cloud_storage_enable_remote_write: true
+          cloud_storage_enable_remote_read: true
+
+    logging:
+      logLevel: info

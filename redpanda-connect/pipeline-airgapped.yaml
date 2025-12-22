@@ -1,0 +1,22 @@
+# Mirror the Redpanda Connect image repo to your internal image registry
+image: 
+  repository: "docker.redpanda.com/redpandadata/connect"
+  tag: v4.68.0
+
+  imagePullSecrets:
+    - name: image-registry-credentials # Secret containing your registry info
+
+config:
+  input:
+    generate:
+      interval: 1s
+      count: 0  # Setting count to 0 ensures it generates data indefinitely.
+      mapping: |
+        root.message = "Hello, Redpanda Connect!"
+  pipeline:
+    processors:
+      - mapping: |
+          root = this.message.uppercase()
+  output:
+    stdout: {}
+    
