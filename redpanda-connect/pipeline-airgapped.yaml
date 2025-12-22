@@ -1,6 +1,6 @@
 # Mirror the Redpanda Connect image repo to your internal image registry
 image: 
-  repository: "docker.redpanda.com/redpandadata/connect"
+  repository: "docker.redpanda.com/redpandadata/connect" # Replace with your internal repo path
   tag: v4.68.0
 
   imagePullSecrets:

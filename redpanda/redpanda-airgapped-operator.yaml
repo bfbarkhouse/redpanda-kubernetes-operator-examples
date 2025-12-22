@@ -8,7 +8,7 @@
 #   --values redpanda-airgapped-operator.yaml
 
 image:
-  repository: docker.redpanda.com/redpandadata/redpanda-operator
+  repository: docker.redpanda.com/redpandadata/redpanda-operator # Replace with your internal repo path
 
 imagePullSecrets:
   - name: image-registry-credentials

@@ -10,7 +10,7 @@ spec:
   image: 
     tag: v3.3.2
     registry: docker.redpanda.com
-    repository: redpandadata/console
+    repository: redpandadata/console # Replace with your internal repo path
   imagePullSecrets:
       - name: image-registry-credentials
 

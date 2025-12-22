@@ -48,7 +48,7 @@ spec:
     #   eks.amazonaws.com/nodegroup: "redpanda" # example label to schedule Redpanda pods to specific nodes
     image:
       tag: v25.3.2
-      repository: docker.redpanda.com/redpandadata/redpanda
+      repository: docker.redpanda.com/redpandadata/redpanda # Replace with your internal repo path
 
     imagePullSecrets:
       - name: image-registry-credentials # Secret containing your registry info
@@ -123,10 +123,10 @@ spec:
       sideCars:
         image:
           tag: v25.3.1
-          repository: docker.redpanda.com/redpandadata/redpanda-operator
+          repository: docker.redpanda.com/redpandadata/redpanda-operator # Replace with your internal repo path
 
       initContainerImage:
-        repository: busybox
+        repository: busybox # Replace with your internal repo path
         tag: latest
 
     # Modify the resources as needed
