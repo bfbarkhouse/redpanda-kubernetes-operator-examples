@@ -108,6 +108,9 @@ spec:
       replicas: 3 # number of Redpanda brokers to create
 
     # Modify the resources as needed
+    # To ensure that Redpanda receives stable and consistent resources, 
+    # set the quality of service (QoS) class to Guaranteed by matching resource requests and limits on all containers in the Pods that run Redpanda.
+    # See: https://docs.redpanda.com/current/manage/kubernetes/k-manage-resources/#qos
     resources:
       requests:
         memory: 64G
