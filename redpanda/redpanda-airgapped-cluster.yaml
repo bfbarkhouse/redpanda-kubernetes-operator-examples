@@ -94,6 +94,19 @@ spec:
     # Operator will configure brokers to advertise FQDNs (e.g. redpanda-0.example.com). 
     # Requires DNS records or ExternalDNS integration
 
+    # Modify the resources as needed
+    # To ensure that Redpanda receives stable and consistent resources, 
+    # set the quality of service (QoS) class to Guaranteed by matching resource requests and limits on all containers in the Pods that run Redpanda.
+    # See: https://docs.redpanda.com/current/manage/kubernetes/k-manage-resources/#qos
+    resources:
+      requests:
+        memory: 64G
+      limits:
+        memory: 64G
+      cpu:
+        cores: 16
+
+
     config:
       cluster:
         admin_api_require_auth: true
@@ -119,27 +132,51 @@ spec:
         # Enables memory locking for the Redpanda process so the operating system does not page Redpanda’s memory out to disk. 
         # Recommended for production
       replicas: 3 # number of Redpanda brokers to create
-
+      
+      # Modify the resources as needed
+      # To ensure that Redpanda receives stable and consistent resources, 
+      # set the quality of service (QoS) class to Guaranteed by matching resource requests and limits on all containers in the Pods that run Redpanda.
+      # See: https://docs.redpanda.com/current/manage/kubernetes/k-manage-resources/#qos
       sideCars:
         image:
           tag: v25.3.1
           repository: docker.redpanda.com/redpandadata/redpanda-operator # Replace with your internal repo path
-
+        configWatcher:
+          resources:
+            requests:
+              cpu: <redpanda-sidecar-container-cpu>
+              memory: <redpanda-sidecar-container-memory>
+            limits:
+              cpu: <redpanda-sidecar-container-cpu> # Matches the request
+              memory: <redpanda-sidecar-container-memory> # Matches the request
+      initContainers:
+        tuning:
+          resources:
+            requests:
+              cpu: <redpanda-tuning-container-cpu>
+              memory: <redpanda-tuning-container-memory>
+            limits:
+              cpu: <redpanda-tuning-container-cpu> # Matches the request
+              memory: <redpanda-tuning-container-memory> # Matches the request
+        setTieredStorageCacheDirOwnership:
+          resources:
+            requests:
+              cpu: <redpanda-ts-cache-ownership-container-cpu>
+              memory: <redpanda-ts-cache-ownership-container-memory>
+            limits:
+              cpu: <redpanda-ts-cache-ownership-container-cpu> # Matches the request
+              memory: <redpanda-ts-cache-ownership-container-memory> # Matches the request
+        configurator:
+          resources:
+            requests:
+              cpu: <redpanda-configurator-container-cpu>
+              memory: <redpanda-configurator-container-memory>
+            limits:
+              cpu: <redpanda-configurator-container-cpu> # Matches the request
+              memory: <redpanda-configurator-container-memory> # Matches the request
       initContainerImage:
         repository: busybox # Replace with your internal repo path
         tag: latest
-
-    # Modify the resources as needed
-    # To ensure that Redpanda receives stable and consistent resources, 
-    # set the quality of service (QoS) class to Guaranteed by matching resource requests and limits on all containers in the Pods that run Redpanda.
-    # See: https://docs.redpanda.com/current/manage/kubernetes/k-manage-resources/#qos
-    resources:
-      requests:
-        memory: 64G
-      limits:
-        memory: 64G
-      cpu:
-        cores: 16
 
     storage:
       persistentVolume:
