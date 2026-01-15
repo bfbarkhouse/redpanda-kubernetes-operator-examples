@@ -38,7 +38,7 @@ metadata:
 spec:
   clusterSpec:
     # nodeSelector:
-    #   eks.amazonaws.com/nodegroup: "redpanda" # example label to schedule Redpanda pods to specific nodes
+    #   k8s.example.com/nodegroup: "redpanda" # example label to schedule Redpanda pods to specific nodes
     image:
       tag: v25.3.4
     enterprise:
